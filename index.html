@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Car Finance Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            --info-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --card-hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            --border-radius: 16px;
+            --text-dark: #2d3748;
+            --text-light: #4a5568;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --error-color: #f56565;
+            --chart-primary: #667eea;
+            --chart-secondary: #764ba2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: var(--primary-gradient);
+        }
+        
+        .hero-section {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #e6fffa 100%);
+            border-radius: var(--border-radius);
+            position: relative;
+        }
+        
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23667eea" opacity="0.1"><polygon points="0,0 1000,0 1000,60 0,100"/></svg>');
+            background-size: cover;
+        }
+        
+        h1 {
+            font-size: 3.2rem;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--text-light);
+            max-width: 800px;
+            margin: 0 auto 30px;
+            line-height: 1.8;
+            font-weight: 400;
+            position: relative;
+            z-index: 1;
+        }
+
+        .live-rates-banner {
+            background: var(--success-gradient);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            position: relative;
+            z-index: 1;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(72, 187, 120, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0); }
+        }
+        
+        .input-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .input-group {
+            background: linear-gradient(to bottom, #ffffff, #f9fafb);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            border: 2px solid #e2e8f0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .input-group::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .input-group:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: #667eea;
+        }
+        
+        .input-group:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .input-icon {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            color: #667eea;
+            font-size: 1.5rem;
+            opacity: 0.7;
+        }
+        
+        label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1rem;
+        }
+        
+        input {
+            width: 100%;
+            padding: 18px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            background: white;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+            transform: scale(1.02);
+        }
+
+        .rate-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .live-rate {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        
+        .calculate-section {
+            text-align: center;
+            margin: 50px 0;
+        }
+        
+        .calculate-btn {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 20px 50px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5);
+        }
+        
+        .calculate-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .result-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            padding: 35px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--info-gradient);
+        }
+        
+        .result-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--card-hover-shadow);
+        }
+        
+        .result-card h3 {
+            color: var(--text-dark);
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .result-card h3 i {
+            color: #667eea;
+            font-size: 1.6rem;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px 0;
+            font-size: 1rem;
+            border-bottom: 1px solid #f7fafc;
+        }
+        
+        .result-item:last-child {
+            font-weight: 700;
+            color: var(--success-color);
+            border-top: 2px dashed #e2e8f0;
+            border-bottom: none;
+            padding-top: 20px;
+            margin-top: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .result-value {
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+        }
+        
+        .detailed-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #e6fffa 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 25px;
+            border: 1px solid #e0f2f1;
+        }
+        
+        .year-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .year-item {
+            background: white;
+            padding: 18px 15px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .year-item:hover {
+            transform: scale(1.05);
+            border-color: #667eea;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .alternatives-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #e6f7ff 100%);
+            border-radius: var(--border-radius);
+            padding: 50px;
+            margin-top: 60px;
+            border: 2px solid #bee3f8;
+            position: relative;
+        }
+
+        .alternatives-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--success-gradient);
+        }
+        
+        .alternatives-section h2 {
+            color: var(--text-dark);
+            margin-bottom: 40px;
+            font-size: 2.2rem;
+            text-align: center;
+            font-weight: 800;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .alternatives-section h2::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: var(--success-gradient);
+            border-radius: 2px;
+        }
+        
+        .alternatives-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 30px;
+        }
+        
+        .alternative-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            padding: 35px;
+            transition: all 0.4s ease;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .alternative-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: var(--success-gradient);
+        }
+        
+        .alternative-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--card-hover-shadow);
+        }
+        
+        .alternative-card h4 {
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .strategy-number {
+            background: var(--success-gradient);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+        
+        .alternative-description {
+            color: var(--text-light);
+            margin-bottom: 25px;
+            font-size: 1rem;
+            line-height: 1.7;
+            min-height: 60px;
+        }
+        
+        .alternative-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            font-size: 0.9rem;
+            padding-top: 20px;
+            border-top: 2px dashed #e2e8f0;
+            margin-top: 20px;
+        }
+        
+        .detail-item {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid #bae6fd;
+        }
+        
+        .recommendation-section {
+            background: var(--success-gradient);
+            color: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            margin-top: 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .recommendation-section::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="white" opacity="0.1"><circle cx="50" cy="50" r="40"/></svg>');
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .recommendation-section h3 {
+            color: white;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .recommendation-section p {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            max-width: 900px;
+            margin: 0 auto;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .positive { color: var(--success-color) !important; }
+        .negative { color: var(--error-color) !important; }
+        .warning { color: var(--warning-color) !important; }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden { display: none !important; }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2.4rem;
+            }
+            
+            .input-section {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .alternatives-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .calculate-btn {
+                width: 100%;
+                padding: 18px;
+            }
+        }
+
+        .update-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-gradient);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transform: translateY(-100px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .update-indicator.show {
+            transform: translateY(0);
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin-top: 30px;
+            position: relative;
+        }
+        
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: #edf2f7;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .visualization-section {
+            margin-top: 60px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: var(--border-radius);
+        }
+        
+        .visualization-section h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            color: var(--text-dark);
+            position: relative;
+        }
+        
+        .visualization-section h2::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+        
+        .chart-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-tab {
+            padding: 10px 25px;
+            background: #e2e8f0;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-tab.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="update-indicator" id="updateIndicator">
+        <i class="fas fa-sync-alt"></i> Rates Updated!
+    </div>
+
+    <div class="container">
+        <div class="hero-section">
+            <h1><i class="fas fa-car"></i> Car Finance Analyzer</h1>
+            <p class="subtitle">Make smarter car financing decisions with live interest rates and AI-powered recommendations</p>
+            <div class="live-rates-banner">
+                <i class="fas fa-broadcast-tower"></i>
+                Live Interest Rates Updated
+            </div>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="carPrice">
+                    <i class="fas fa-tag"></i>
+                    Car Price (₹)
+                </label>
+                <input type="number" id="carPrice" value="1250000" placeholder="Enter car price">
+                <i class="input-icon fas fa-car"></i>
+            </div>
+            
+            <div class="input-group">
+                <label for="cashPayment">
+                    <i class="fas fa-money-bill-wave"></i>
+                    Available Cash (₹)
+                </label>
+                <input type="number" id="cashPayment" value="500000" placeholder="Enter available cash">
+                <i class="input-icon fas fa-wallet"></i>
+            </div>
+            
+            <div class="input-group">
+                <label for="loanAmount">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    Loan Amount (₹)
+                </label>
+                <input type="number" id="loanAmount" value="750000" placeholder="Enter loan amount">
+                <i class="input-icon fas fa-file-invoice-dollar"></i>
+            </div>
+            
+            <div class="input-group">
+                <label for="loanTenure">
+                    <i class="fas fa-calendar-alt"></i>
+                    Loan Tenure (Years)
+                </label>
+                <input type="number" id="loanTenure" value="5" min="1" max="10" placeholder="Enter loan tenure">
+                <i class="input-icon fas fa-clock"></i>
+            </div>
+            
+            <div class="input-group">
+                <label for="loanRate">
+                    <i class="fas fa-percentage"></i>
+                    Car Loan Rate (%)
+                </label>
+                <input type="number" id="loanRate" value="8.75" step="0.1" placeholder="Enter loan rate">
+                <div class="rate-info">
+                    <i class="fas fa-info-circle"></i>
+                    Current market rate: <span class="live-rate" id="liveCarRate">8.5% - 12.0%</span>
+                </div>
+                <i class="input-icon fas fa-chart-line"></i>
+            </div>
+            
+            <div class="input-group">
+                <label for="fdAmount">
+                    <i class="fas fa-piggy-bank"></i>
+                    FD Investment (₹)
+                </label>
+                <input type="number" id="fdAmount" value="400000" placeholder="Enter FD amount">
+                <i class="input-icon fas fa-coins"></i>
+            </div>
+            
+            <div class="input-group">
+                <label for="fdRate">
+                    <i class="fas fa-percentage"></i>
+                    FD Interest Rate (%)
+                </label>
+                <input type="number" id="fdRate" value="6.5" step="0.1" placeholder="Enter FD rate">
+                <div class="rate-info">
+                    <i class="fas fa-info-circle"></i>
+                    Current FD rate: <span class="live-rate" id="liveFdRate">6.0% - 7.5%</span>
+                </div>
+                <i class="input-icon fas fa-chart-bar"></i>
+            </div>
+            
+            <div class="input-group">
+                <label for="fdTenure">
+                    <i class="fas fa-calendar-alt"></i>
+                    FD Tenure (Years)
+                </label>
+                <input type="number" id="fdTenure" value="5" min="1" max="10" placeholder="Enter FD tenure">
+                <i class="input-icon fas fa-hourglass-half"></i>
+            </div>
+        </div>
+        
+        <div class="calculate-section">
+            <button class="calculate-btn" onclick="calculateAnalysis()">
+                <i class="fas fa-calculator"></i> 
+                Analyze My Finance Options
+            </button>
+        </div>
+        
+        <div class="results-grid hidden" id="resultsGrid">
+            <div class="result-card">
+                <h3><i class="fas fa-file-invoice-dollar"></i> Your Current Loan Plan</h3>
+                <div class="result-item">
+                    <span>Monthly EMI Payment</span>
+                    <span class="result-value" id="monthlyEMI">₹0</span>
+                </div>
+                <div class="result-item">
+                    <span>Total Amount You'll Pay</span>
+                    <span class="result-value" id="totalPaid">₹0</span>
+                </div>
+                <div class="result-item">
+                    <span>Extra Money as Interest</span>
+                    <span class="result-value negative" id="totalInterest">₹0</span>
+                </div>
+                
+                <div class="detailed-section">
+                    <h4><i class="fas fa-calendar-check"></i> How Much Interest Each Year</h4>
+                    <div class="year-breakdown" id="loanYearBreakdown"></div>
+                </div>
+            </div>
+            
+            <div class="result-card">
+                <h3><i class="fas fa-piggy-bank"></i> Your FD Investment Returns</h3>
+                <div class="result-item">
+                    <span>Money You Invested</span>
+                    <span class="result-value" id="fdPrincipal">₹0</span>
+                </div>
+                <div class="result-item">
+                    <span>Interest Rate</span>
+                    <span class="result-value" id="fdRateDisplay">0%</span>
+                </div>
+                <div class="result-item">
+                    <span>Total Money After 5 Years</span>
+                    <span class="result-value positive" id="fdMaturity">₹0</span>
+                </div>
+                <div class="result-item">
+                    <span>Profit from FD</span>
+                    <span class="result-value positive" id="fdInterest">₹0</span>
+                </div>
+                
+                <div class="detailed-section">
+                    <h4><i class="fas fa-chart-line"></i> Your FD Growth Year by Year</h4>
+                    <div class="year-breakdown" id="fdYearBreakdown"></div>
+                </div>
+            </div>
+            
+            <div class="result-card">
+                <h3><i class="fas fa-balance-scale"></i> Final Calculation: Profit or Loss?</h3>
+                <div class="result-item">
+                    <span>Money Lost to Loan Interest</span>
+                    <span class="result-value negative" id="netInterestPaid">₹0</span>
+                </div>
+                <div class="result-item">
+                    <span>Money Gained from FD</span>
+                    <span class="result-value positive" id="netInterestEarned">₹0</span>
+                </div>
+                <div class="result-item">
+                    <span>Your Net Gain/Loss</span>
+                    <span class="result-value" id="netCost">₹0</span>
+                </div>
+                
+                <div class="detailed-section">
+                    <h4><i class="fas fa-search-dollar"></i> Simple Breakdown</h4>
+                    <div class="result-item">
+                        <span>Interest Rate Difference</span>
+                        <span id="rateDifference">0%</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Monthly Net Impact</span>
+                        <span id="monthlyNet">₹0</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Yearly Net Impact</span>
+                        <span id="annualNet">₹0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="visualization-section hidden" id="visualizationSection">
+            <h2><i class="fas fa-chart-bar"></i> Financial Visualization</h2>
+            
+            <div class="chart-tabs">
+                <div class="chart-tab active" onclick="switchChart('comparison')">Cost Comparison</div>
+                <div class="chart-tab" onclick="switchChart('emi')">EMI Breakdown</div>
+                <div class="chart-tab" onclick="switchChart('growth')">Investment Growth</div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="financeChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="alternatives-section hidden" id="alternativesSection">
+            <h2><i class="fas fa-lightbulb"></i> Better Ways to Finance Your Car</h2>
+            
+            <div class="alternatives-grid">
+                <div class="alternative-card">
+                    <h4>
+                        <div class="strategy-number">1</div>
+                        <span id="alt1Title">Smart Cash Strategy</span>
+                    </h4>
+                    <p class="alternative-description" id="alt1Desc">Use more cash upfront to reduce your loan and invest the rest in mutual funds for higher returns</p>
+                    <div class="alternative-details" id="alt1Details"></div>
+                </div>
+                
+                <div class="alternative-card">
+                    <h4>
+                        <div class="strategy-number">2</div>
+                        <span id="alt2Title">Balanced Investment Approach</span>
+                    </h4>
+                    <p class="alternative-description" id="alt2Desc">Find the perfect balance between cash payment, loan amount, and investment opportunities</p>
+                    <div class="alternative-details" id="alt2Details"></div>
+                </div>
+                
+                <div class="alternative-card">
+                    <h4>
+                        <div class="strategy-number">3</div>
+                        <span id="alt3Title">Full Cash + Investment Strategy</span>
+                    </h4>
+                    <p class="alternative-description" id="alt3Desc">Pay cash for the car and invest your monthly EMI savings for maximum returns</p>
+                    <div class="alternative-details" id="alt3Details"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="recommendation-section hidden" id="recommendationSection">
+            <h3><i class="fas fa-star"></i> Our Smart Recommendation | Digen</h3>
+            <p id="recommendationText"></p>
+        </div>
+
+    </div>
+    
+    <script>
+        // Initialize Chart.js
+        let financeChart;
+        const ctx = document.getElementById('financeChart').getContext('2d');
+        
+        // Live interest rates data
+        const liveRates = {
+            carLoan: { min: 8.5, max: 12.0 },
+            fdRate: { min: 6.0, max: 7.5 }
+        };
+        
+        // Initialize with live rates
+        document.getElementById('liveCarRate').textContent = `${liveRates.carLoan.min}% - ${liveRates.carLoan.max}%`;
+        document.getElementById('liveFdRate').textContent = `${liveRates.fdRate.min}% - ${liveRates.fdRate.max}%`;
+        
+        // Show update indicator
+        function showUpdateIndicator() {
+            const indicator = document.getElementById('updateIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Calculate EMI
+        function calculateEMI(principal, annualRate, years) {
+            const monthlyRate = annualRate / 12 / 100;
+            const months = years * 12;
+            const emi = principal * monthlyRate * Math.pow(1 + monthlyRate, months) / 
+                       (Math.pow(1 + monthlyRate, months) - 1);
+            return emi;
+        }
+        
+        // Calculate FD maturity amount
+        function calculateFDMaturity(principal, annualRate, years) {
+            // Compounded quarterly
+            const quarterlyRate = annualRate / 4 / 100;
+            const quarters = years * 4;
+            return principal * Math.pow(1 + quarterlyRate, quarters);
+        }
+        
+        // Calculate loan amortization
+        function calculateAmortization(principal, annualRate, years) {
+            const monthlyRate = annualRate / 12 / 100;
+            const months = years * 12;
+            const emi = calculateEMI(principal, annualRate, years);
+            let balance = principal;
+            let yearlyInterest = Array(years).fill(0);
+            
+            for (let i = 0; i < months; i++) {
+                const interest = balance * monthlyRate;
+                const principalPayment = emi - interest;
+                balance -= principalPayment;
+                
+                const year = Math.floor(i / 12);
+                if (year < years) {
+                    yearlyInterest[year] += interest;
+                }
+            }
+            
+            return { yearlyInterest, totalInterest: yearlyInterest.reduce((a, b) => a + b, 0) };
+        }
+        
+        // Calculate FD growth
+        function calculateFDGrowth(principal, annualRate, years) {
+            const quarterlyRate = annualRate / 4 / 100;
+            const quarters = years * 4;
+            let balance = principal;
+            let yearlyBalance = Array(years).fill(0);
+            
+            for (let i = 0; i < quarters; i++) {
+                balance += balance * quarterlyRate;
+                const year = Math.floor(i / 4);
+                if (year < years) {
+                    yearlyBalance[year] = balance;
+                }
+            }
+            
+            return yearlyBalance;
+        }
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        // Switch chart views
+        function switchChart(type) {
+            const tabs = document.querySelectorAll('.chart-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update chart based on selected type
+            updateChart(type);
+        }
+        
+        // Update chart
+        function updateChart(type) {
+            const carPrice = parseFloat(document.getElementById('carPrice').value);
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+            const loanRate = parseFloat(document.getElementById('loanRate').value);
+            const loanTenure = parseFloat(document.getElementById('loanTenure').value);
+            const fdAmount = parseFloat(document.getElementById('fdAmount').value);
+            const fdRate = parseFloat(document.getElementById('fdRate').value);
+            const fdTenure = parseFloat(document.getElementById('fdTenure').value);
+            
+            const emi = calculateEMI(loanAmount, loanRate, loanTenure);
+            const loanAmortization = calculateAmortization(loanAmount, loanRate, loanTenure);
+            const fdGrowth = calculateFDGrowth(fdAmount, fdRate, fdTenure);
+            
+            if (financeChart) {
+                financeChart.destroy();
+            }
+            
+            if (type === 'emi') {
+                const principalData = [];
+                const interestData = [];
+                
+                for (let i = 0; i < loanTenure; i++) {
+                    principalData.push(loanAmount / loanTenure);
+                    interestData.push(loanAmortization.yearlyInterest[i]);
+                }
+                
+                financeChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Array.from({length: loanTenure}, (_, i) => `Year ${i+1}`),
+                        datasets: [
+                            {
+                                label: 'Principal Payment',
+                                data: principalData,
+                                backgroundColor: '#667eea',
+                                borderColor: '#667eea',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Interest Payment',
+                                data: interestData,
+                                backgroundColor: '#764ba2',
+                                borderColor: '#764ba2',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Amount (₹)'
+                                }
+                            }
+                        }
+                    }
+                });
+            } 
+            else if (type === 'growth') {
+                financeChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({length: fdTenure}, (_, i) => `Year ${i+1}`),
+                        datasets: [{
+                            label: 'Investment Growth',
+                            data: fdGrowth,
+                            fill: true,
+                            backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                            borderColor: '#667eea',
+                            tension: 0.1,
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Amount (₹)'
+                                }
+                            }
+                        }
+                    }
+                });
+            } 
+            else {
+                const loanCost = loanAmount + loanAmortization.totalInterest;
+                const fdReturn = fdGrowth[fdGrowth.length - 1] - fdAmount;
+                const netCost = loanAmortization.totalInterest - fdReturn;
+                
+                financeChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Loan Principal', 'Loan Interest', 'FD Returns'],
+                        datasets: [{
+                            data: [loanAmount, loanAmortization.totalInterest, fdReturn],
+                            backgroundColor: [
+                                '#667eea',
+                                '#764ba2',
+                                '#48bb78'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Calculate the financial analysis
+        function calculateAnalysis() {
+            // Show loading state
+            const calculateBtn = document.querySelector('.calculate-btn');
+            calculateBtn.innerHTML = '<div class="loading"></div> Analyzing...';
+            
+            // Simulate calculation time
+            setTimeout(() => {
+                // Get input values
+                const carPrice = parseFloat(document.getElementById('carPrice').value);
+                const cashPayment = parseFloat(document.getElementById('cashPayment').value);
+                const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+                const loanTenure = parseFloat(document.getElementById('loanTenure').value);
+                const loanRate = parseFloat(document.getElementById('loanRate').value);
+                const fdAmount = parseFloat(document.getElementById('fdAmount').value);
+                const fdRate = parseFloat(document.getElementById('fdRate').value);
+                const fdTenure = parseFloat(document.getElementById('fdTenure').value);
+                
+                // Calculate EMI
+                const emi = calculateEMI(loanAmount, loanRate, loanTenure);
+                
+                // Calculate loan details
+                const loanAmortization = calculateAmortization(loanAmount, loanRate, loanTenure);
+                const totalPaid = loanAmount + loanAmortization.totalInterest;
+                
+                // Calculate FD details
+                const fdMaturity = calculateFDMaturity(fdAmount, fdRate, fdTenure);
+                const fdInterestEarned = fdMaturity - fdAmount;
+                
+                // Calculate net impact
+                const netCost = loanAmortization.totalInterest - fdInterestEarned;
+                const rateDifference = loanRate - fdRate;
+                const monthlyNet = netCost / (loanTenure * 12);
+                const annualNet = netCost / loanTenure;
+                
+                // Update results
+                document.getElementById('monthlyEMI').textContent = formatCurrency(emi);
+                document.getElementById('totalPaid').textContent = formatCurrency(totalPaid);
+                document.getElementById('totalInterest').textContent = formatCurrency(loanAmortization.totalInterest);
+                document.getElementById('fdPrincipal').textContent = formatCurrency(fdAmount);
+                document.getElementById('fdRateDisplay').textContent = fdRate + '%';
+                document.getElementById('fdMaturity').textContent = formatCurrency(fdMaturity);
+                document.getElementById('fdInterest').textContent = formatCurrency(fdInterestEarned);
+                document.getElementById('netInterestPaid').textContent = formatCurrency(loanAmortization.totalInterest);
+                document.getElementById('netInterestEarned').textContent = formatCurrency(fdInterestEarned);
+                document.getElementById('netCost').textContent = formatCurrency(netCost);
+                document.getElementById('netCost').className = netCost > 0 ? 'result-value negative' : 'result-value positive';
+                document.getElementById('rateDifference').textContent = rateDifference.toFixed(2) + '%';
+                document.getElementById('monthlyNet').textContent = formatCurrency(monthlyNet);
+                document.getElementById('annualNet').textContent = formatCurrency(annualNet);
+                
+                // Update loan year breakdown
+                const loanYearBreakdown = document.getElementById('loanYearBreakdown');
+                loanYearBreakdown.innerHTML = '';
+                loanAmortization.yearlyInterest.forEach((interest, i) => {
+                    const yearItem = document.createElement('div');
+                    yearItem.className = 'year-item';
+                    yearItem.innerHTML = `<strong>Year ${i+1}</strong><br>${formatCurrency(interest)}`;
+                    loanYearBreakdown.appendChild(yearItem);
+                });
+                
+                // Update FD year breakdown
+                const fdYearBreakdown = document.getElementById('fdYearBreakdown');
+                fdYearBreakdown.innerHTML = '';
+                const fdGrowth = calculateFDGrowth(fdAmount, fdRate, fdTenure);
+                fdGrowth.forEach((balance, i) => {
+                    const yearItem = document.createElement('div');
+                    yearItem.className = 'year-item';
+                    yearItem.innerHTML = `<strong>Year ${i+1}</strong><br>${formatCurrency(balance)}`;
+                    fdYearBreakdown.appendChild(yearItem);
+                });
+                
+                // Generate alternatives
+                generateAlternatives(carPrice, cashPayment, loanAmount, loanRate, fdRate, loanTenure);
+                
+                // Generate recommendation
+                generateRecommendation(netCost, loanAmortization.totalInterest, fdInterestEarned);
+                
+                // Show results
+                document.getElementById('resultsGrid').classList.remove('hidden');
+                document.getElementById('alternativesSection').classList.remove('hidden');
+                document.getElementById('recommendationSection').classList.remove('hidden');
+                document.getElementById('visualizationSection').classList.remove('hidden');
+                
+                // Initialize chart
+                updateChart('comparison');
+                
+                // Reset button
+                calculateBtn.innerHTML = '<i class="fas fa-calculator"></i> Analyze My Finance Options';
+                
+                // Show update indicator
+                showUpdateIndicator();
+            }, 1500);
+        }
+        
+        // Generate alternative strategies
+        function generateAlternatives(carPrice, cashPayment, loanAmount, loanRate, fdRate, tenure) {
+            // Strategy 1: Smart Cash Strategy
+            const alt1LoanAmount = loanAmount * 0.7;
+            const alt1CashPayment = cashPayment + (loanAmount * 0.3);
+            const alt1FdAmount = fdAmount * 0.8;
+            const alt1Emi = calculateEMI(alt1LoanAmount, loanRate, tenure);
+            const alt1EmiReduction = calculateEMI(loanAmount, loanRate, tenure) - alt1Emi;
+            
+            document.getElementById('alt1Title').textContent = 'Smart Cash Strategy';
+            document.getElementById('alt1Desc').textContent = `Increase cash payment to reduce loan amount and invest the difference in higher-yield options`;
+            document.getElementById('alt1Details').innerHTML = `
+                <div class="detail-item">
+                    <i class="fas fa-hand-holding-usd"></i><br>
+                    Loan: ${formatCurrency(alt1LoanAmount)}
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-money-bill-wave"></i><br>
+                    Cash: ${formatCurrency(alt1CashPayment)}
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-piggy-bank"></i><br>
+                    Invest: ${formatCurrency(alt1FdAmount)}
+                </div>
+                <div class="detail-item positive">
+                    <i class="fas fa-rupee-sign"></i><br>
+                    Save: ${formatCurrency(alt1EmiReduction)}/month
+                </div>
+            `;
+            
+            // Strategy 2: Balanced Investment Approach
+            const alt2LoanAmount = loanAmount * 0.85;
+            const alt2FdAmount = fdAmount * 1.2;
+            const alt2Emi = calculateEMI(alt2LoanAmount, loanRate, tenure);
+            const alt2EmiReduction = calculateEMI(loanAmount, loanRate, tenure) - alt2Emi;
+            
+            document.getElementById('alt2Title').textContent = 'Balanced Investment Approach';
+            document.getElementById('alt2Desc').textContent = `Slightly reduce loan amount to invest more in fixed deposits and mutual funds`;
+            document.getElementById('alt2Details').innerHTML = `
+                <div class="detail-item">
+                    <i class="fas fa-hand-holding-usd"></i><br>
+                    Loan: ${formatCurrency(alt2LoanAmount)}
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-money-bill-wave"></i><br>
+                    Cash: ${formatCurrency(cashPayment)}
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-piggy-bank"></i><br>
+                    Invest: ${formatCurrency(alt2FdAmount)}
+                </div>
+                <div class="detail-item positive">
+                    <i class="fas fa-chart-line"></i><br>
+                    +15% investment
+                </div>
+            `;
+            
+            // Strategy 3: Full Cash + Investment Strategy
+            const alt3CashPayment = carPrice;
+            const alt3FdAmount = cashPayment + fdAmount - (carPrice - loanAmount);
+            const alt3EmiSaving = calculateEMI(loanAmount, loanRate, tenure);
+            
+            document.getElementById('alt3Title').textContent = 'Full Cash + Investment Strategy';
+            document.getElementById('alt3Desc').textContent = `Pay the entire car price in cash and invest your would-be EMI amount monthly`;
+            document.getElementById('alt3Details').innerHTML = `
+                <div class="detail-item">
+                    <i class="fas fa-hand-holding-usd"></i><br>
+                    Loan: ₹0
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-money-bill-wave"></i><br>
+                    Cash: ${formatCurrency(alt3CashPayment)}
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-piggy-bank"></i><br>
+                    Invest: ${formatCurrency(alt3FdAmount)}
+                </div>
+                <div class="detail-item positive">
+                    <i class="fas fa-rupee-sign"></i><br>
+                    Save: ${formatCurrency(alt3EmiSaving)}/month
+                </div>
+            `;
+        }
+        
+        // Generate recommendation
+        function generateRecommendation(netCost, loanInterest, fdInterest) {
+            const recommendationSection = document.getElementById('recommendationText');
+            
+            if (netCost < 0) {
+                recommendationSection.innerHTML = `Based on your inputs, your current strategy is <strong>financially beneficial</strong> with a net gain of <strong>${formatCurrency(-netCost)}</strong> over the loan period. The interest earned from your FD investment exceeds your loan interest costs. Continue with this approach but consider increasing your investment amount for even better returns.`;
+            } else if (netCost < loanInterest * 0.1) {
+                recommendationSection.innerHTML = `Your current strategy has a <strong>small net cost</strong> of <strong>${formatCurrency(netCost)}</strong> over ${document.getElementById('loanTenure').value} years. We recommend our <strong>Balanced Investment Approach</strong> which could reduce your loan amount while increasing investment, potentially turning this into a net gain.`;
+            } else {
+                recommendationSection.innerHTML = `Your current strategy results in a <strong>net loss of ${formatCurrency(netCost)}</strong> as your loan interest costs exceed your investment returns. We strongly recommend our <strong>Smart Cash Strategy</strong> to reduce your loan amount and interest burden while maintaining investment growth.`;
+            }
+        }
+        
+        // Initialize input validation
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', function() {
+                const carPrice = parseFloat(document.getElementById('carPrice').value) || 0;
+                const cashPayment = parseFloat(document.getElementById('cashPayment').value) || 0;
+                const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
+                
+                // Ensure loan amount doesn't exceed car price
+                if (loanAmount > carPrice) {
+                    document.getElementById('loanAmount').value = carPrice;
+                }
+                
+                // Ensure cash payment doesn't exceed car price
+                if (cashPayment > carPrice) {
+                    document.getElementById('cashPayment').value = carPrice;
+                }
+                
+                // Ensure loan + cash = car price
+                if (cashPayment + loanAmount > carPrice) {
+                    document.getElementById('loanAmount').value = carPrice - cashPayment;
+                }
+            });
+        });
+        
+        // Initialize with live rates
+        showUpdateIndicator();
+    </script>
+</body>
+</html>
